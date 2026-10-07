@@ -4,62 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>24時間カレンダー</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-      background: #ffffff;
-      color: #333;
-    }
-
-    .app {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    #status {
-      color: #666;
-      margin-bottom: 24px;
-    }
-
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 12px 18px;
-      font-size: 16px;
-      background: #333;
-      color: white;
-    }
-  </style>
 </head>
 
 <body>
-  <main class="app">
-    <h1>24時間カレンダー</h1>
 
-    <p id="status">Firebaseを準備しています……</p>
+  <h1>24時間カレンダー</h1>
 
-    <button id="loginButton">Googleでログイン</button>
-  </main>
+  <p id="status">準備中……</p>
+
+  <button id="loginButton">Googleでログイン</button>
 
   <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
     import {
       getAuth,
       GoogleAuthProvider,
       signInWithPopup,
       onAuthStateChanged
-    } from
-      "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    }
+      from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
     const firebaseConfig = {
@@ -74,43 +40,63 @@
 
 
     const app = initializeApp(firebaseConfig);
+
     const auth = getAuth(app);
+
     const provider = new GoogleAuthProvider();
 
-    const loginButton = document.getElementById("loginButton");
+    const button = document.getElementById("loginButton");
+
     const status = document.getElementById("status");
 
 
-    loginButton.addEventListener("click", async () => {
-      try {
-        status.textContent = "Googleログイン画面を開いています……";
+    button.addEventListener("click", async () => {
 
-        await signInWithPopup(auth, provider);
+      status.textContent = "ログインしています……";
+
+      try {
+
+        const result = await signInWithPopup(auth, provider);
+
+        status.textContent =
+          "ログイン成功！ " +
+          (result.user.displayName || result.user.email);
+
+        button.style.display = "none";
 
       } catch (error) {
+
         console.error(error);
 
         status.textContent =
-          "ログインに失敗しました。もう一度お試しください。";
+          "エラー：" + error.code;
 
-        console.log("Firebase error:", error.code);
+        alert(
+          "ログインエラー\n\n" +
+          error.code + "\n\n" +
+          error.message
+        );
+
       }
+
     });
 
 
     onAuthStateChanged(auth, (user) => {
+
       if (user) {
-        status.textContent =
-          `ログイン中：${user.displayName || user.email}`;
 
-        loginButton.style.display = "none";
-      } else {
         status.textContent =
-          "Googleアカウントでログインしてください。";
+          "ログイン中：" +
+          (user.displayName || user.email);
 
-        loginButton.style.display = "block";
+        button.style.display = "none";
+
       }
+
     });
+
   </script>
+
 </body>
 </html>
